@@ -39,7 +39,6 @@
 	        });        
 	        
 	        $("#stopRecordingSound").on("tap", function(e) {
-                e.preventDefault();
 	            $("#recordSoundDialog").popup("close");
 	        });
 	        

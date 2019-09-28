@@ -1,5 +1,5 @@
 // Platform: ios
-// 3.4.0
+// 948e932548412305aa7f24b3a90e386aa5c3d12c
 /*
  Licensed to the Apache Software Foundation (ASF) under one
  or more contributor license agreements.  See the NOTICE file
@@ -19,35 +19,30 @@
  under the License.
 */
 ;(function() {
-var CORDOVA_JS_BUILD_LABEL = '3.4.0';
+var PLATFORM_VERSION_BUILD_LABEL = '5.0.1';
 // file: src/scripts/require.js
 
-/*jshint -W079 */
-/*jshint -W020 */
-
-var require,
-    define;
+var require;
+var define;
 
 (function () {
-    var modules = {},
+    var modules = {};
     // Stack of moduleIds currently being built.
-        requireStack = [],
+    var requireStack = [];
     // Map of module ID -> index into requireStack of modules currently being built.
-        inProgressModules = {},
-        SEPARATOR = ".";
+    var inProgressModules = {};
+    var SEPARATOR = '.';
 
-
-
-    function build(module) {
-        var factory = module.factory,
-            localRequire = function (id) {
-                var resultantId = id;
-                //Its a relative path, so lop off the last portion and add the id (minus "./")
-                if (id.charAt(0) === ".") {
-                    resultantId = module.id.slice(0, module.id.lastIndexOf(SEPARATOR)) + SEPARATOR + id.slice(2);
-                }
-                return require(resultantId);
-            };
+    function build (module) {
+        var factory = module.factory;
+        var localRequire = function (id) {
+            var resultantId = id;
+            // Its a relative path, so lop off the last portion and add the id (minus "./")
+            if (id.charAt(0) === '.') {
+                resultantId = module.id.slice(0, module.id.lastIndexOf(SEPARATOR)) + SEPARATOR + id.slice(2);
+            }
+            return require(resultantId);
+        };
         module.exports = {};
         delete module.factory;
         factory(localRequire, module.exports, module);
@@ -56,10 +51,10 @@ var require,
 
     require = function (id) {
         if (!modules[id]) {
-            throw "module " + id + " not found";
+            throw 'module ' + id + ' not found';
         } else if (id in inProgressModules) {
             var cycle = requireStack.slice(inProgressModules[id]).join('->') + '->' + id;
-            throw "Cycle in require graph: " + cycle;
+            throw 'Cycle in require graph: ' + cycle;
         }
         if (modules[id].factory) {
             try {
@@ -76,7 +71,7 @@ var require,
 
     define = function (id, factory) {
         if (modules[id]) {
-            throw "module " + id + " already defined";
+            throw 'module ' + id + ' already defined';
         }
 
         modules[id] = {
@@ -92,8 +87,8 @@ var require,
     define.moduleMap = modules;
 })();
 
-//Export for use in node
-if (typeof module === "object" && typeof require === "function") {
+// Export for use in node
+if (typeof module === 'object' && typeof require === 'function') {
     module.exports.require = require;
     module.exports.define = define;
 }
@@ -101,6 +96,11 @@ if (typeof module === "object" && typeof require === "function") {
 // file: src/cordova.js
 define("cordova", function(require, exports, module) {
 
+// Workaround for Windows 10 in hosted environment case
+// http://www.w3.org/html/wg/drafts/html/master/browsers.html#named-access-on-the-window-object
+if (window.cordova && !(window.cordova instanceof HTMLElement)) { // eslint-disable-line no-undef
+    throw new Error('cordova already defined');
+}
 
 var channel = require('cordova/channel');
 var platform = require('cordova/platform');
@@ -117,48 +117,48 @@ var m_window_removeEventListener = window.removeEventListener;
 /**
  * Houses custom event handlers to intercept on document + window event listeners.
  */
-var documentEventHandlers = {},
-    windowEventHandlers = {};
+var documentEventHandlers = {};
+var windowEventHandlers = {};
 
-document.addEventListener = function(evt, handler, capture) {
+document.addEventListener = function (evt, handler, capture) {
     var e = evt.toLowerCase();
-    if (typeof documentEventHandlers[e] != 'undefined') {
+    if (typeof documentEventHandlers[e] !== 'undefined') {
         documentEventHandlers[e].subscribe(handler);
     } else {
         m_document_addEventListener.call(document, evt, handler, capture);
     }
 };
 
-window.addEventListener = function(evt, handler, capture) {
+window.addEventListener = function (evt, handler, capture) {
     var e = evt.toLowerCase();
-    if (typeof windowEventHandlers[e] != 'undefined') {
+    if (typeof windowEventHandlers[e] !== 'undefined') {
         windowEventHandlers[e].subscribe(handler);
     } else {
         m_window_addEventListener.call(window, evt, handler, capture);
     }
 };
 
-document.removeEventListener = function(evt, handler, capture) {
+document.removeEventListener = function (evt, handler, capture) {
     var e = evt.toLowerCase();
     // If unsubscribing from an event that is handled by a plugin
-    if (typeof documentEventHandlers[e] != "undefined") {
+    if (typeof documentEventHandlers[e] !== 'undefined') {
         documentEventHandlers[e].unsubscribe(handler);
     } else {
         m_document_removeEventListener.call(document, evt, handler, capture);
     }
 };
 
-window.removeEventListener = function(evt, handler, capture) {
+window.removeEventListener = function (evt, handler, capture) {
     var e = evt.toLowerCase();
     // If unsubscribing from an event that is handled by a plugin
-    if (typeof windowEventHandlers[e] != "undefined") {
+    if (typeof windowEventHandlers[e] !== 'undefined') {
         windowEventHandlers[e].unsubscribe(handler);
     } else {
         m_window_removeEventListener.call(window, evt, handler, capture);
     }
 };
 
-function createEvent(type, data) {
+function createEvent (type, data) {
     var event = document.createEvent('Events');
     event.initEvent(type, false, false);
     if (data) {
@@ -171,28 +171,32 @@ function createEvent(type, data) {
     return event;
 }
 
-
+/* eslint-disable no-undef */
 var cordova = {
-    define:define,
-    require:require,
-    version:CORDOVA_JS_BUILD_LABEL,
-    platformId:platform.id,
+    define: define,
+    require: require,
+    version: PLATFORM_VERSION_BUILD_LABEL,
+    platformVersion: PLATFORM_VERSION_BUILD_LABEL,
+    platformId: platform.id,
+
+    /* eslint-enable no-undef */
+
     /**
      * Methods to add/remove your own addEventListener hijacking on document + window.
      */
-    addWindowEventHandler:function(event) {
+    addWindowEventHandler: function (event) {
         return (windowEventHandlers[event] = channel.create(event));
     },
-    addStickyDocumentEventHandler:function(event) {
+    addStickyDocumentEventHandler: function (event) {
         return (documentEventHandlers[event] = channel.createSticky(event));
     },
-    addDocumentEventHandler:function(event) {
+    addDocumentEventHandler: function (event) {
         return (documentEventHandlers[event] = channel.create(event));
     },
-    removeWindowEventHandler:function(event) {
+    removeWindowEventHandler: function (event) {
         delete windowEventHandlers[event];
     },
-    removeDocumentEventHandler:function(event) {
+    removeDocumentEventHandler: function (event) {
         delete documentEventHandlers[event];
     },
     /**
@@ -200,24 +204,23 @@ var cordova = {
      *
      * @return object
      */
-    getOriginalHandlers: function() {
-        return {'document': {'addEventListener': m_document_addEventListener, 'removeEventListener': m_document_removeEventListener},
-        'window': {'addEventListener': m_window_addEventListener, 'removeEventListener': m_window_removeEventListener}};
+    getOriginalHandlers: function () {
+        return { 'document': { 'addEventListener': m_document_addEventListener, 'removeEventListener': m_document_removeEventListener },
+            'window': { 'addEventListener': m_window_addEventListener, 'removeEventListener': m_window_removeEventListener } };
     },
     /**
      * Method to fire event from native code
      * bNoDetach is required for events which cause an exception which needs to be caught in native code
      */
-    fireDocumentEvent: function(type, data, bNoDetach) {
+    fireDocumentEvent: function (type, data, bNoDetach) {
         var evt = createEvent(type, data);
-        if (typeof documentEventHandlers[type] != 'undefined') {
-            if( bNoDetach ) {
+        if (typeof documentEventHandlers[type] !== 'undefined') {
+            if (bNoDetach) {
                 documentEventHandlers[type].fire(evt);
-            }
-            else {
-                setTimeout(function() {
+            } else {
+                setTimeout(function () {
                     // Fire deviceready on listeners that were registered before cordova.js was loaded.
-                    if (type == 'deviceready') {
+                    if (type === 'deviceready') {
                         document.dispatchEvent(evt);
                     }
                     documentEventHandlers[type].fire(evt);
@@ -227,10 +230,10 @@ var cordova = {
             document.dispatchEvent(evt);
         }
     },
-    fireWindowEvent: function(type, data) {
-        var evt = createEvent(type,data);
-        if (typeof windowEventHandlers[type] != 'undefined') {
-            setTimeout(function() {
+    fireWindowEvent: function (type, data) {
+        var evt = createEvent(type, data);
+        if (typeof windowEventHandlers[type] !== 'undefined') {
+            setTimeout(function () {
                 windowEventHandlers[type].fire(evt);
             }, 0);
         } else {
@@ -244,7 +247,7 @@ var cordova = {
     // Randomize the starting callbackId to avoid collisions after refreshing or navigating.
     // This way, it's very unlikely that any new callback would get the same callbackId as an old callback.
     callbackId: Math.floor(Math.random() * 2000000000),
-    callbacks:  {},
+    callbacks: {},
     callbackStatus: {
         NO_RESULT: 0,
         OK: 1,
@@ -261,56 +264,61 @@ var cordova = {
     /**
      * Called by native code when returning successful result from an action.
      */
-    callbackSuccess: function(callbackId, args) {
-        try {
-            cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
-        } catch (e) {
-            console.log("Error in error callback: " + callbackId + " = "+e);
-        }
+    callbackSuccess: function (callbackId, args) {
+        cordova.callbackFromNative(callbackId, true, args.status, [args.message], args.keepCallback);
     },
 
     /**
      * Called by native code when returning error result from an action.
      */
-    callbackError: function(callbackId, args) {
+    callbackError: function (callbackId, args) {
         // TODO: Deprecate callbackSuccess and callbackError in favour of callbackFromNative.
         // Derive success from status.
-        try {
-            cordova.callbackFromNative(callbackId, false, args.status, [args.message], args.keepCallback);
-        } catch (e) {
-            console.log("Error in error callback: " + callbackId + " = "+e);
-        }
+        cordova.callbackFromNative(callbackId, false, args.status, [args.message], args.keepCallback);
     },
 
     /**
      * Called by native code when returning the result from an action.
      */
-    callbackFromNative: function(callbackId, success, status, args, keepCallback) {
-        var callback = cordova.callbacks[callbackId];
-        if (callback) {
-            if (success && status == cordova.callbackStatus.OK) {
-                callback.success && callback.success.apply(null, args);
-            } else if (!success) {
-                callback.fail && callback.fail.apply(null, args);
+    callbackFromNative: function (callbackId, isSuccess, status, args, keepCallback) {
+        try {
+            var callback = cordova.callbacks[callbackId];
+            if (callback) {
+                if (isSuccess && status === cordova.callbackStatus.OK) {
+                    callback.success && callback.success.apply(null, args);
+                } else if (!isSuccess) {
+                    callback.fail && callback.fail.apply(null, args);
+                }
+                /*
+                else
+                    Note, this case is intentionally not caught.
+                    this can happen if isSuccess is true, but callbackStatus is NO_RESULT
+                    which is used to remove a callback from the list without calling the callbacks
+                    typically keepCallback is false in this case
+                */
+                // Clear callback if not expecting any more results
+                if (!keepCallback) {
+                    delete cordova.callbacks[callbackId];
+                }
             }
-
-            // Clear callback if not expecting any more results
-            if (!keepCallback) {
-                delete cordova.callbacks[callbackId];
-            }
+        } catch (err) {
+            var msg = 'Error in ' + (isSuccess ? 'Success' : 'Error') + ' callbackId: ' + callbackId + ' : ' + err;
+            console && console.log && console.log(msg);
+            console && console.log && err.stack && console.log(err.stack);
+            cordova.fireWindowEvent('cordovacallbackerror', { 'message': msg });
+            throw err;
         }
     },
-    addConstructor: function(func) {
-        channel.onCordovaReady.subscribe(function() {
+    addConstructor: function (func) {
+        channel.onCordovaReady.subscribe(function () {
             try {
                 func();
-            } catch(e) {
-                console.log("Failed to run constructor: " + e);
+            } catch (e) {
+                console.log('Failed to run constructor: ' + e);
             }
         });
     }
 };
-
 
 module.exports = cordova;
 
@@ -319,7 +327,6 @@ module.exports = cordova;
 // file: src/common/argscheck.js
 define("cordova/argscheck", function(require, exports, module) {
 
-var exec = require('cordova/exec');
 var utils = require('cordova/utils');
 
 var moduleExports = module.exports;
@@ -333,29 +340,29 @@ var typeMap = {
     'O': 'Object'
 };
 
-function extractParamName(callee, argIndex) {
+function extractParamName (callee, argIndex) {
     return (/.*?\((.*?)\)/).exec(callee)[1].split(', ')[argIndex];
 }
 
-function checkArgs(spec, functionName, args, opt_callee) {
+function checkArgs (spec, functionName, args, opt_callee) {
     if (!moduleExports.enableChecks) {
         return;
     }
     var errMsg = null;
     var typeName;
     for (var i = 0; i < spec.length; ++i) {
-        var c = spec.charAt(i),
-            cUpper = c.toUpperCase(),
-            arg = args[i];
+        var c = spec.charAt(i);
+        var cUpper = c.toUpperCase();
+        var arg = args[i];
         // Asterix means allow anything.
-        if (c == '*') {
+        if (c === '*') {
             continue;
         }
         typeName = utils.typeName(arg);
-        if ((arg === null || arg === undefined) && c == cUpper) {
+        if ((arg === null || arg === undefined) && c === cUpper) {
             continue;
         }
-        if (typeName != typeMap[cUpper]) {
+        if (typeName !== typeMap[cUpper]) {
             errMsg = 'Expected ' + typeMap[cUpper];
             break;
         }
@@ -364,21 +371,20 @@ function checkArgs(spec, functionName, args, opt_callee) {
         errMsg += ', but got ' + typeName + '.';
         errMsg = 'Wrong type for parameter "' + extractParamName(opt_callee || args.callee, i) + '" of ' + functionName + ': ' + errMsg;
         // Don't log when running unit tests.
-        if (typeof jasmine == 'undefined') {
+        if (typeof jasmine === 'undefined') {
             console.error(errMsg);
         }
         throw TypeError(errMsg);
     }
 }
 
-function getValue(value, defaultValue) {
+function getValue (value, defaultValue) {
     return value === undefined ? defaultValue : value;
 }
 
 moduleExports.checkArgs = checkArgs;
 moduleExports.getValue = getValue;
 moduleExports.enableChecks = true;
-
 
 });
 
@@ -387,48 +393,58 @@ define("cordova/base64", function(require, exports, module) {
 
 var base64 = exports;
 
-base64.fromArrayBuffer = function(arrayBuffer) {
+base64.fromArrayBuffer = function (arrayBuffer) {
     var array = new Uint8Array(arrayBuffer);
     return uint8ToBase64(array);
 };
 
-//------------------------------------------------------------------------------
+base64.toArrayBuffer = function (str) {
+    var decodedStr = typeof atob !== 'undefined' ? atob(str) : Buffer.from(str, 'base64').toString('binary'); // eslint-disable-line no-undef
+    var arrayBuffer = new ArrayBuffer(decodedStr.length);
+    var array = new Uint8Array(arrayBuffer);
+    for (var i = 0, len = decodedStr.length; i < len; i++) {
+        array[i] = decodedStr.charCodeAt(i);
+    }
+    return arrayBuffer;
+};
+
+// ------------------------------------------------------------------------------
 
 /* This code is based on the performance tests at http://jsperf.com/b64tests
  * This 12-bit-at-a-time algorithm was the best performing version on all
  * platforms tested.
  */
 
-var b64_6bit = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+var b64_6bit = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 var b64_12bit;
 
-var b64_12bitTable = function() {
+var b64_12bitTable = function () {
     b64_12bit = [];
-    for (var i=0; i<64; i++) {
-        for (var j=0; j<64; j++) {
-            b64_12bit[i*64+j] = b64_6bit[i] + b64_6bit[j];
+    for (var i = 0; i < 64; i++) {
+        for (var j = 0; j < 64; j++) {
+            b64_12bit[i * 64 + j] = b64_6bit[i] + b64_6bit[j];
         }
     }
-    b64_12bitTable = function() { return b64_12bit; };
+    b64_12bitTable = function () { return b64_12bit; };
     return b64_12bit;
 };
 
-function uint8ToBase64(rawData) {
+function uint8ToBase64 (rawData) {
     var numBytes = rawData.byteLength;
-    var output="";
+    var output = '';
     var segment;
     var table = b64_12bitTable();
-    for (var i=0;i<numBytes-2;i+=3) {
-        segment = (rawData[i] << 16) + (rawData[i+1] << 8) + rawData[i+2];
+    for (var i = 0; i < numBytes - 2; i += 3) {
+        segment = (rawData[i] << 16) + (rawData[i + 1] << 8) + rawData[i + 2];
         output += table[segment >> 12];
         output += table[segment & 0xfff];
     }
-    if (numBytes - i == 2) {
-        segment = (rawData[i] << 16) + (rawData[i+1] << 8);
+    if (numBytes - i === 2) {
+        segment = (rawData[i] << 16) + (rawData[i + 1] << 8);
         output += table[segment >> 12];
         output += b64_6bit[(segment & 0xfff) >> 6];
         output += '=';
-    } else if (numBytes - i == 1) {
+    } else if (numBytes - i === 1) {
         segment = (rawData[i] << 16);
         output += table[segment >> 12];
         output += '==';
@@ -443,7 +459,7 @@ define("cordova/builder", function(require, exports, module) {
 
 var utils = require('cordova/utils');
 
-function each(objects, func, context) {
+function each (objects, func, context) {
     for (var prop in objects) {
         if (objects.hasOwnProperty(prop)) {
             func.apply(context, [objects[prop], prop]);
@@ -451,20 +467,25 @@ function each(objects, func, context) {
     }
 }
 
-function clobber(obj, key, value) {
+function clobber (obj, key, value) {
     exports.replaceHookForTesting(obj, key);
-    obj[key] = value;
+    var needsProperty = false;
+    try {
+        obj[key] = value;
+    } catch (e) {
+        needsProperty = true;
+    }
     // Getters can only be overridden by getters.
-    if (obj[key] !== value) {
-        utils.defineGetter(obj, key, function() {
+    if (needsProperty || obj[key] !== value) {
+        utils.defineGetter(obj, key, function () {
             return value;
         });
     }
 }
 
-function assignOrWrapInDeprecateGetter(obj, key, value, message) {
+function assignOrWrapInDeprecateGetter (obj, key, value, message) {
     if (message) {
-        utils.defineGetter(obj, key, function() {
+        utils.defineGetter(obj, key, function () {
             console.log(message);
             delete obj[key];
             clobber(obj, key, value);
@@ -475,7 +496,7 @@ function assignOrWrapInDeprecateGetter(obj, key, value, message) {
     }
 }
 
-function include(parent, objects, clobber, merge) {
+function include (parent, objects, clobber, merge) {
     each(objects, function (obj, key) {
         try {
             var result = obj.path ? require(obj.path) : {};
@@ -495,7 +516,7 @@ function include(parent, objects, clobber, merge) {
                 result = parent[key];
             } else {
                 // Overwrite if not currently defined.
-                if (typeof parent[key] == 'undefined') {
+                if (typeof parent[key] === 'undefined') {
                     assignOrWrapInDeprecateGetter(parent, key, result, obj.deprecated);
                 } else {
                     // Set result to what already exists, so we can build children into it if they exist.
@@ -506,7 +527,7 @@ function include(parent, objects, clobber, merge) {
             if (obj.children) {
                 include(result, obj.children, clobber, merge);
             }
-        } catch(e) {
+        } catch (e) {
             utils.alert('Exception building Cordova JS globals: ' + e + ' for key "' + key + '"');
         }
     });
@@ -519,7 +540,7 @@ function include(parent, objects, clobber, merge) {
  * @param target Object to merge properties into.
  * @param src Object to merge properties from.
  */
-function recursiveMerge(target, src) {
+function recursiveMerge (target, src) {
     for (var prop in src) {
         if (src.hasOwnProperty(prop)) {
             if (target.prototype && target.prototype.constructor === target) {
@@ -536,26 +557,26 @@ function recursiveMerge(target, src) {
     }
 }
 
-exports.buildIntoButDoNotClobber = function(objects, target) {
+exports.buildIntoButDoNotClobber = function (objects, target) {
     include(target, objects, false, false);
 };
-exports.buildIntoAndClobber = function(objects, target) {
+exports.buildIntoAndClobber = function (objects, target) {
     include(target, objects, true, false);
 };
-exports.buildIntoAndMerge = function(objects, target) {
+exports.buildIntoAndMerge = function (objects, target) {
     include(target, objects, true, true);
 };
 exports.recursiveMerge = recursiveMerge;
 exports.assignOrWrapInDeprecateGetter = assignOrWrapInDeprecateGetter;
-exports.replaceHookForTesting = function() {};
+exports.replaceHookForTesting = function () {};
 
 });
 
 // file: src/common/channel.js
 define("cordova/channel", function(require, exports, module) {
 
-var utils = require('cordova/utils'),
-    nextGuid = 1;
+var utils = require('cordova/utils');
+var nextGuid = 1;
 
 /**
  * Custom pub-sub "channel" that can have functions subscribed to it
@@ -570,7 +591,6 @@ var utils = require('cordova/utils'),
  * onDeviceReady*              User event fired to indicate that Cordova is ready
  * onResume                    User event fired to indicate a start/resume lifecycle event
  * onPause                     User event fired to indicate a pause lifecycle event
- * onDestroy*                  Internal event fired when app is being destroyed (User should use window.onunload event, not this one).
  *
  * The events marked with an * are sticky. Once they have fired, they will stay in the fired state.
  * All listeners that subscribe after the event is fired will be executed right away.
@@ -596,7 +616,7 @@ var utils = require('cordova/utils'),
  * @constructor
  * @param type  String the channel name
  */
-var Channel = function(type, sticky) {
+var Channel = function (type, sticky) {
     this.type = type;
     // Map of guid -> function.
     this.handlers = {};
@@ -609,69 +629,75 @@ var Channel = function(type, sticky) {
     // Function that is called when the first listener is subscribed, or when
     // the last listener is unsubscribed.
     this.onHasSubscribersChange = null;
-},
-    channel = {
-        /**
-         * Calls the provided function only after all of the channels specified
-         * have been fired. All channels must be sticky channels.
-         */
-        join: function(h, c) {
-            var len = c.length,
-                i = len,
-                f = function() {
-                    if (!(--i)) h();
-                };
-            for (var j=0; j<len; j++) {
-                if (c[j].state === 0) {
-                    throw Error('Can only use join with sticky channels.');
-                }
-                c[j].subscribe(f);
+};
+var channel = {
+    /**
+     * Calls the provided function only after all of the channels specified
+     * have been fired. All channels must be sticky channels.
+     */
+    join: function (h, c) {
+        var len = c.length;
+        var i = len;
+        var f = function () {
+            if (!(--i)) h();
+        };
+        for (var j = 0; j < len; j++) {
+            if (c[j].state === 0) {
+                throw Error('Can only use join with sticky channels.');
             }
-            if (!len) h();
-        },
-        create: function(type) {
-            return channel[type] = new Channel(type, false);
-        },
-        createSticky: function(type) {
-            return channel[type] = new Channel(type, true);
-        },
-
-        /**
-         * cordova Channels that must fire before "deviceready" is fired.
-         */
-        deviceReadyChannelsArray: [],
-        deviceReadyChannelsMap: {},
-
-        /**
-         * Indicate that a feature needs to be initialized before it is ready to be used.
-         * This holds up Cordova's "deviceready" event until the feature has been initialized
-         * and Cordova.initComplete(feature) is called.
-         *
-         * @param feature {String}     The unique feature name
-         */
-        waitForInitialization: function(feature) {
-            if (feature) {
-                var c = channel[feature] || this.createSticky(feature);
-                this.deviceReadyChannelsMap[feature] = c;
-                this.deviceReadyChannelsArray.push(c);
-            }
-        },
-
-        /**
-         * Indicate that initialization code has completed and the feature is ready to be used.
-         *
-         * @param feature {String}     The unique feature name
-         */
-        initializationComplete: function(feature) {
-            var c = this.deviceReadyChannelsMap[feature];
-            if (c) {
-                c.fire();
-            }
+            c[j].subscribe(f);
         }
-    };
+        if (!len) h();
+    },
+    /* eslint-disable no-return-assign */
+    create: function (type) {
+        return channel[type] = new Channel(type, false);
+    },
+    createSticky: function (type) {
+        return channel[type] = new Channel(type, true);
+    },
+    /* eslint-enable no-return-assign */
+    /**
+     * cordova Channels that must fire before "deviceready" is fired.
+     */
+    deviceReadyChannelsArray: [],
+    deviceReadyChannelsMap: {},
 
-function forceFunction(f) {
-    if (typeof f != 'function') throw "Function required as first argument!";
+    /**
+     * Indicate that a feature needs to be initialized before it is ready to be used.
+     * This holds up Cordova's "deviceready" event until the feature has been initialized
+     * and Cordova.initComplete(feature) is called.
+     *
+     * @param feature {String}     The unique feature name
+     */
+    waitForInitialization: function (feature) {
+        if (feature) {
+            var c = channel[feature] || this.createSticky(feature);
+            this.deviceReadyChannelsMap[feature] = c;
+            this.deviceReadyChannelsArray.push(c);
+        }
+    },
+
+    /**
+     * Indicate that initialization code has completed and the feature is ready to be used.
+     *
+     * @param feature {String}     The unique feature name
+     */
+    initializationComplete: function (feature) {
+        var c = this.deviceReadyChannelsMap[feature];
+        if (c) {
+            c.fire();
+        }
+    }
+};
+
+function checkSubscriptionArgument (argument) {
+    if (typeof argument !== 'function' && typeof argument.handleEvent !== 'function') {
+        throw new Error(
+            'Must provide a function or an EventListener object ' +
+                'implementing the handleEvent interface.'
+        );
+    }
 }
 
 /**
@@ -681,30 +707,41 @@ function forceFunction(f) {
  * and a guid that can be used to stop subscribing to the channel.
  * Returns the guid.
  */
-Channel.prototype.subscribe = function(f, c) {
-    // need a function to call
-    forceFunction(f);
-    if (this.state == 2) {
-        f.apply(c || this, this.fireArgs);
+Channel.prototype.subscribe = function (eventListenerOrFunction, eventListener) {
+    checkSubscriptionArgument(eventListenerOrFunction);
+    var handleEvent, guid;
+
+    if (eventListenerOrFunction && typeof eventListenerOrFunction === 'object') {
+        // Received an EventListener object implementing the handleEvent interface
+        handleEvent = eventListenerOrFunction.handleEvent;
+        eventListener = eventListenerOrFunction;
+    } else {
+        // Received a function to handle event
+        handleEvent = eventListenerOrFunction;
+    }
+
+    if (this.state === 2) {
+        handleEvent.apply(eventListener || this, this.fireArgs);
         return;
     }
 
-    var func = f,
-        guid = f.observer_guid;
-    if (typeof c == "object") { func = utils.close(c, f); }
+    guid = eventListenerOrFunction.observer_guid;
+    if (typeof eventListener === 'object') {
+        handleEvent = utils.close(eventListener, handleEvent);
+    }
 
     if (!guid) {
-        // first time any channel has seen this subscriber
+        // First time any channel has seen this subscriber
         guid = '' + nextGuid++;
     }
-    func.observer_guid = guid;
-    f.observer_guid = guid;
+    handleEvent.observer_guid = guid;
+    eventListenerOrFunction.observer_guid = guid;
 
     // Don't add the same handler more than once.
     if (!this.handlers[guid]) {
-        this.handlers[guid] = func;
+        this.handlers[guid] = handleEvent;
         this.numHandlers++;
-        if (this.numHandlers == 1) {
+        if (this.numHandlers === 1) {
             this.onHasSubscribersChange && this.onHasSubscribersChange();
         }
     }
@@ -713,12 +750,20 @@ Channel.prototype.subscribe = function(f, c) {
 /**
  * Unsubscribes the function with the given guid from the channel.
  */
-Channel.prototype.unsubscribe = function(f) {
-    // need a function to unsubscribe
-    forceFunction(f);
+Channel.prototype.unsubscribe = function (eventListenerOrFunction) {
+    checkSubscriptionArgument(eventListenerOrFunction);
+    var handleEvent, guid, handler;
 
-    var guid = f.observer_guid,
-        handler = this.handlers[guid];
+    if (eventListenerOrFunction && typeof eventListenerOrFunction === 'object') {
+        // Received an EventListener object implementing the handleEvent interface
+        handleEvent = eventListenerOrFunction.handleEvent;
+    } else {
+        // Received a function to handle event
+        handleEvent = eventListenerOrFunction;
+    }
+
+    guid = handleEvent.observer_guid;
+    handler = this.handlers[guid];
     if (handler) {
         delete this.handlers[guid];
         this.numHandlers--;
@@ -731,11 +776,11 @@ Channel.prototype.unsubscribe = function(f) {
 /**
  * Calls all functions subscribed to this channel.
  */
-Channel.prototype.fire = function(e) {
-    var fail = false,
-        fireArgs = Array.prototype.slice.call(arguments);
+Channel.prototype.fire = function (e) {
+    var fail = false; // eslint-disable-line no-unused-vars
+    var fireArgs = Array.prototype.slice.call(arguments);
     // Apply stickiness.
-    if (this.state == 1) {
+    if (this.state === 1) {
         this.state = 2;
         this.fireArgs = fireArgs;
     }
@@ -749,14 +794,13 @@ Channel.prototype.fire = function(e) {
         for (var i = 0; i < toCall.length; ++i) {
             toCall[i].apply(this, fireArgs);
         }
-        if (this.state == 2 && this.numHandlers) {
+        if (this.state === 2 && this.numHandlers) {
             this.numHandlers = 0;
             this.handlers = {};
             this.onHasSubscribersChange && this.onHasSubscribersChange();
         }
     }
 };
-
 
 // defining them here so they are ready super fast!
 // DOM event that is received when the web page is loaded and parsed.
@@ -770,6 +814,7 @@ channel.createSticky('onNativeReady');
 channel.createSticky('onCordovaReady');
 
 // Event to indicate that all automatically loaded JS plugins are loaded and ready.
+// FIXME remove this
 channel.createSticky('onPluginsReady');
 
 // Event to indicate that Cordova is ready
@@ -781,9 +826,6 @@ channel.create('onResume');
 // Event to indicate a pause lifecycle event
 channel.create('onPause');
 
-// Event to indicate a destroy lifecycle event
-channel.createSticky('onDestroy');
-
 // Channels that must fire before "deviceready" is fired.
 channel.waitForInitialization('onCordovaReady');
 channel.waitForInitialization('onDOMContentLoaded');
@@ -792,69 +834,22 @@ module.exports = channel;
 
 });
 
-// file: src/ios/exec.js
+// file: /Users/dpogue/Coding/cordova-ios/cordova-js-src/exec.js
 define("cordova/exec", function(require, exports, module) {
+
+/*global require, module, atob, document */
 
 /**
  * Creates a gap bridge iframe used to notify the native code about queued
  * commands.
  */
 var cordova = require('cordova'),
-    channel = require('cordova/channel'),
     utils = require('cordova/utils'),
     base64 = require('cordova/base64'),
-    // XHR mode does not work on iOS 4.2.
-    // XHR mode's main advantage is working around a bug in -webkit-scroll, which
-    // doesn't exist only on iOS 5.x devices.
-    // IFRAME_NAV is the fastest.
-    // IFRAME_HASH could be made to enable synchronous bridge calls if we wanted this feature.
-    jsToNativeModes = {
-        IFRAME_NAV: 0,
-        XHR_NO_PAYLOAD: 1,
-        XHR_WITH_PAYLOAD: 2,
-        XHR_OPTIONAL_PAYLOAD: 3,
-        IFRAME_HASH_NO_PAYLOAD: 4,
-        // Bundling the payload turns out to be slower. Probably since it has to be URI encoded / decoded.
-        IFRAME_HASH_WITH_PAYLOAD: 5
-    },
-    bridgeMode,
     execIframe,
-    execHashIframe,
-    hashToggle = 1,
-    execXhr,
-    requestCount = 0,
-    vcHeaderValue = null,
     commandQueue = [], // Contains pending JS->Native messages.
-    isInContextOfEvalJs = 0;
-
-function createExecIframe() {
-    var iframe = document.createElement("iframe");
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    return iframe;
-}
-
-function createHashIframe() {
-    var ret = createExecIframe();
-    // Hash changes don't work on about:blank, so switch it to file:///.
-    ret.contentWindow.history.replaceState(null, null, 'file:///#');
-    return ret;
-}
-
-function shouldBundleCommandJson() {
-    if (bridgeMode === jsToNativeModes.XHR_WITH_PAYLOAD) {
-        return true;
-    }
-    if (bridgeMode === jsToNativeModes.XHR_OPTIONAL_PAYLOAD) {
-        var payloadLength = 0;
-        for (var i = 0; i < commandQueue.length; ++i) {
-            payloadLength += commandQueue[i].length;
-        }
-        // The value here was determined using the benchmark within CordovaLibApp on an iPad 3.
-        return payloadLength < 4500;
-    }
-    return false;
-}
+    isInContextOfEvalJs = 0,
+    failSafeTimerId = 0;
 
 function massageArgsJsToNative(args) {
     if (!args || utils.typeName(args) != 'Array') {
@@ -906,16 +901,10 @@ function convertMessageToArgsNativeToJs(message) {
 }
 
 function iOSExec() {
-    // Use XHR for iOS 5 to work around a bug in -webkit-scroll.
-    // Use IFRAME_NAV elsewhere since it's faster and XHR bridge
-    // seems to have bugs in newer OS's (CB-3900, CB-3359, CB-5457, CB-4970, CB-4998, CB-5134)
-    if (bridgeMode === undefined) {
-        bridgeMode = navigator.userAgent.indexOf(' 5_') == -1 ? jsToNativeModes.IFRAME_NAV: jsToNativeModes.XHR_NO_PAYLOAD;
-    }
 
-    var successCallback, failCallback, service, action, actionArgs, splitCommand;
+    var successCallback, failCallback, service, action, actionArgs;
     var callbackId = null;
-    if (typeof arguments[0] !== "string") {
+    if (typeof arguments[0] !== 'string') {
         // FORMAT ONE
         successCallback = arguments[0];
         failCallback = arguments[1];
@@ -929,19 +918,13 @@ function iOSExec() {
         // an invalid callbackId and passes it even if no callbacks were given.
         callbackId = 'INVALID';
     } else {
-        // FORMAT TWO, REMOVED
-        try {
-            splitCommand = arguments[0].split(".");
-            action = splitCommand.pop();
-            service = splitCommand.join(".");
-            actionArgs = Array.prototype.splice.call(arguments, 1);
-
-            console.log('The old format of this exec call has been removed (deprecated since 2.1). Change to: ' +
-                       "cordova.exec(null, null, \"" + service + "\", \"" + action + "\"," + JSON.stringify(actionArgs) + ");"
-            );
-            return;
-        } catch (e) {}
+        throw new Error('The old format of this exec call has been removed (deprecated since 2.1). Change to: ' +
+            'cordova.exec(null, null, \'Service\', \'action\', [ arg1, arg2 ]);'
+        );
     }
+
+    // If actionArgs is not provided, default to an empty array
+    actionArgs = actionArgs || [];
 
     // Register the callbacks and add the callbackId to the positional
     // arguments if given.
@@ -965,71 +948,80 @@ function iOSExec() {
     // Also, if there is already a command in the queue, then we've already
     // poked the native side, so there is no reason to do so again.
     if (!isInContextOfEvalJs && commandQueue.length == 1) {
-        switch (bridgeMode) {
-        case jsToNativeModes.XHR_NO_PAYLOAD:
-        case jsToNativeModes.XHR_WITH_PAYLOAD:
-        case jsToNativeModes.XHR_OPTIONAL_PAYLOAD:
-            // This prevents sending an XHR when there is already one being sent.
-            // This should happen only in rare circumstances (refer to unit tests).
-            if (execXhr && execXhr.readyState != 4) {
-                execXhr = null;
-            }
-            // Re-using the XHR improves exec() performance by about 10%.
-            execXhr = execXhr || new XMLHttpRequest();
-            // Changing this to a GET will make the XHR reach the URIProtocol on 4.2.
-            // For some reason it still doesn't work though...
-            // Add a timestamp to the query param to prevent caching.
-            execXhr.open('HEAD', "/!gap_exec?" + (+new Date()), true);
-            if (!vcHeaderValue) {
-                vcHeaderValue = /.*\((.*)\)/.exec(navigator.userAgent)[1];
-            }
-            execXhr.setRequestHeader('vc', vcHeaderValue);
-            execXhr.setRequestHeader('rc', ++requestCount);
-            if (shouldBundleCommandJson()) {
-                execXhr.setRequestHeader('cmds', iOSExec.nativeFetchMessages());
-            }
-            execXhr.send(null);
-            break;
-        case jsToNativeModes.IFRAME_HASH_NO_PAYLOAD:
-        case jsToNativeModes.IFRAME_HASH_WITH_PAYLOAD:
-            execHashIframe = execHashIframe || createHashIframe();
-            // Check if they've removed it from the DOM, and put it back if so.
-            if (!execHashIframe.contentWindow) {
-                execHashIframe = createHashIframe();
-            }
-            // The delegate method is called only when the hash changes, so toggle it back and forth.
-            hashToggle = hashToggle ^ 3;
-            var hashValue = '%0' + hashToggle;
-            if (bridgeMode === jsToNativeModes.IFRAME_HASH_WITH_PAYLOAD) {
-                hashValue += iOSExec.nativeFetchMessages();
-            }
-            execHashIframe.contentWindow.location.hash = hashValue;
-            break;
-        default:
-            execIframe = execIframe || createExecIframe();
-            // Check if they've removed it from the DOM, and put it back if so.
-            if (!execIframe.contentWindow) {
-                execIframe = createExecIframe();
-            }
-            execIframe.src = "gap://ready";
-        }
+        pokeNative();
     }
 }
 
-iOSExec.jsToNativeModes = jsToNativeModes;
+// CB-10530
+function proxyChanged() {
+    var cexec = cordovaExec();
+       
+    return (execProxy !== cexec && // proxy objects are different
+            iOSExec !== cexec      // proxy object is not the current iOSExec
+            );
+}
 
-iOSExec.setJsToNativeBridgeMode = function(mode) {
-    // Remove the iFrame since it may be no longer required, and its existence
-    // can trigger browser bugs.
-    // https://issues.apache.org/jira/browse/CB-593
-    if (execIframe) {
-        execIframe.parentNode.removeChild(execIframe);
-        execIframe = null;
+// CB-10106
+function handleBridgeChange() {
+    if (proxyChanged()) {
+        var commandString = commandQueue.shift();
+        while(commandString) {
+            var command = JSON.parse(commandString);
+            var callbackId = command[0];
+            var service = command[1];
+            var action = command[2];
+            var actionArgs = command[3];
+            var callbacks = cordova.callbacks[callbackId] || {};
+            
+            execProxy(callbacks.success, callbacks.fail, service, action, actionArgs);
+            
+            commandString = commandQueue.shift();
+        };
+        return true;
     }
-    bridgeMode = mode;
-};
+    
+    return false;
+}
+
+function pokeNative() {
+    // CB-5488 - Don't attempt to create iframe before document.body is available.
+    if (!document.body) {
+        setTimeout(pokeNative);
+        return;
+    }
+    
+    // Check if they've removed it from the DOM, and put it back if so.
+    if (execIframe && execIframe.contentWindow) {
+        execIframe.contentWindow.location = 'gap://ready';
+    } else {
+        execIframe = document.createElement('iframe');
+        execIframe.style.display = 'none';
+        execIframe.src = 'gap://ready';
+        document.body.appendChild(execIframe);
+    }
+    // Use a timer to protect against iframe being unloaded during the poke (CB-7735).
+    // This makes the bridge ~ 7% slower, but works around the poke getting lost
+    // when the iframe is removed from the DOM.
+    // An onunload listener could be used in the case where the iframe has just been
+    // created, but since unload events fire only once, it doesn't work in the normal
+    // case of iframe reuse (where unload will have already fired due to the attempted
+    // navigation of the page).
+    failSafeTimerId = setTimeout(function() {
+        if (commandQueue.length) {
+            // CB-10106 - flush the queue on bridge change
+            if (!handleBridgeChange()) {
+                pokeNative();
+             }
+        }
+    }, 50); // Making this > 0 improves performance (marginally) in the normal case (where it doesn't fire).
+}
 
 iOSExec.nativeFetchMessages = function() {
+    // Stop listing for window detatch once native side confirms poke.
+    if (failSafeTimerId) {
+        clearTimeout(failSafeTimerId);
+        failSafeTimerId = 0;
+    }
     // Each entry in commandQueue is a JSON string already.
     if (!commandQueue.length) {
         return '';
@@ -1039,11 +1031,14 @@ iOSExec.nativeFetchMessages = function() {
     return json;
 };
 
-iOSExec.nativeCallback = function(callbackId, status, message, keepCallback) {
+iOSExec.nativeCallback = function(callbackId, status, message, keepCallback, debug) {
     return iOSExec.nativeEvalAndFetch(function() {
         var success = status === 0 || status === 1;
         var args = convertMessageToArgsNativeToJs(message);
-        cordova.callbackFromNative(callbackId, success, status, args, keepCallback);
+        function nc2() {
+            cordova.callbackFromNative(callbackId, success, status, args, keepCallback);
+        }
+        setTimeout(nc2, 0);
     });
 };
 
@@ -1058,13 +1053,36 @@ iOSExec.nativeEvalAndFetch = function(func) {
     }
 };
 
-module.exports = iOSExec;
+// Proxy the exec for bridge changes. See CB-10106
+
+function cordovaExec() {
+    var cexec = require('cordova/exec');
+    var cexec_valid = (typeof cexec.nativeFetchMessages === 'function') && (typeof cexec.nativeEvalAndFetch === 'function') && (typeof cexec.nativeCallback === 'function');
+    return (cexec_valid && execProxy !== cexec)? cexec : iOSExec;
+}
+
+function execProxy() {
+    cordovaExec().apply(null, arguments);
+};
+
+execProxy.nativeFetchMessages = function() {
+    return cordovaExec().nativeFetchMessages.apply(null, arguments);
+};
+
+execProxy.nativeEvalAndFetch = function() {
+    return cordovaExec().nativeEvalAndFetch.apply(null, arguments);
+};
+
+execProxy.nativeCallback = function() {
+    return cordovaExec().nativeCallback.apply(null, arguments);
+};
+
+module.exports = execProxy;
 
 });
 
 // file: src/common/exec/proxy.js
 define("cordova/exec/proxy", function(require, exports, module) {
-
 
 // internal map of proxy function
 var CommandProxyMap = {};
@@ -1072,24 +1090,25 @@ var CommandProxyMap = {};
 module.exports = {
 
     // example: cordova.commandProxy.add("Accelerometer",{getCurrentAcceleration: function(successCallback, errorCallback, options) {...},...);
-    add:function(id,proxyObj) {
-        console.log("adding proxy for " + id);
+    add: function (id, proxyObj) {
+        console.log('adding proxy for ' + id);
         CommandProxyMap[id] = proxyObj;
         return proxyObj;
     },
 
     // cordova.commandProxy.remove("Accelerometer");
-    remove:function(id) {
+    remove: function (id) {
         var proxy = CommandProxyMap[id];
         delete CommandProxyMap[id];
         CommandProxyMap[id] = null;
         return proxy;
     },
 
-    get:function(service,action) {
-        return ( CommandProxyMap[service] ? CommandProxyMap[service][action] : null );
+    get: function (service, action) {
+        return (CommandProxyMap[service] ? CommandProxyMap[service][action] : null);
     }
 };
+
 });
 
 // file: src/common/init.js
@@ -1100,19 +1119,20 @@ var cordova = require('cordova');
 var modulemapper = require('cordova/modulemapper');
 var platform = require('cordova/platform');
 var pluginloader = require('cordova/pluginloader');
+var utils = require('cordova/utils');
 
 var platformInitChannelsArray = [channel.onNativeReady, channel.onPluginsReady];
 
-function logUnfiredChannels(arr) {
+function logUnfiredChannels (arr) {
     for (var i = 0; i < arr.length; ++i) {
-        if (arr[i].state != 2) {
+        if (arr[i].state !== 2) {
             console.log('Channel not fired: ' + arr[i].type);
         }
     }
 }
 
-window.setTimeout(function() {
-    if (channel.onDeviceReady.state != 2) {
+window.setTimeout(function () {
+    if (channel.onDeviceReady.state !== 2) {
         console.log('deviceready has not fired after 5 seconds.');
         logUnfiredChannels(platformInitChannelsArray);
         logUnfiredChannels(channel.deviceReadyChannelsArray);
@@ -1121,46 +1141,54 @@ window.setTimeout(function() {
 
 // Replace navigator before any modules are required(), to ensure it happens as soon as possible.
 // We replace it so that properties that can't be clobbered can instead be overridden.
-function replaceNavigator(origNavigator) {
-    var CordovaNavigator = function() {};
+function replaceNavigator (origNavigator) {
+    var CordovaNavigator = function () {};
     CordovaNavigator.prototype = origNavigator;
     var newNavigator = new CordovaNavigator();
     // This work-around really only applies to new APIs that are newer than Function.bind.
     // Without it, APIs such as getGamepads() break.
     if (CordovaNavigator.bind) {
         for (var key in origNavigator) {
-            if (typeof origNavigator[key] == 'function') {
+            if (typeof origNavigator[key] === 'function') {
                 newNavigator[key] = origNavigator[key].bind(origNavigator);
+            } else {
+                (function (k) {
+                    utils.defineGetterSetter(newNavigator, key, function () {
+                        return origNavigator[k];
+                    });
+                })(key);
             }
         }
     }
     return newNavigator;
 }
+
 if (window.navigator) {
     window.navigator = replaceNavigator(window.navigator);
 }
 
 if (!window.console) {
     window.console = {
-        log: function(){}
+        log: function () {}
     };
 }
 if (!window.console.warn) {
-    window.console.warn = function(msg) {
-        this.log("warn: " + msg);
+    window.console.warn = function (msg) {
+        this.log('warn: ' + msg);
     };
 }
 
 // Register pause, resume and deviceready channels as events on document.
 channel.onPause = cordova.addDocumentEventHandler('pause');
 channel.onResume = cordova.addDocumentEventHandler('resume');
+channel.onActivated = cordova.addDocumentEventHandler('activated');
 channel.onDeviceReady = cordova.addStickyDocumentEventHandler('deviceready');
 
 // Listen for DOMContentLoaded and notify our channel subscribers.
-if (document.readyState == 'complete' || document.readyState == 'interactive') {
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
     channel.onDOMContentLoaded.fire();
 } else {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         channel.onDOMContentLoaded.fire();
     }, false);
 }
@@ -1179,14 +1207,18 @@ modulemapper.clobbers('cordova/exec', 'Cordova.exec');
 // Call the platform-specific initialization.
 platform.bootstrap && platform.bootstrap();
 
-pluginloader.load(function() {
-    channel.onPluginsReady.fire();
-});
+// Wrap in a setTimeout to support the use-case of having plugin JS appended to cordova.js.
+// The delay allows the attached modules to be defined before the plugin loader looks for them.
+setTimeout(function () {
+    pluginloader.load(function () {
+        channel.onPluginsReady.fire();
+    });
+}, 0);
 
 /**
  * Create all cordova objects once native side is ready.
  */
-channel.join(function() {
+channel.join(function () {
     modulemapper.mapModules(window);
 
     platform.initialize && platform.initialize();
@@ -1197,29 +1229,28 @@ channel.join(function() {
     // Fire onDeviceReady event once page has fully loaded, all
     // constructors have run and cordova info has been received from native
     // side.
-    channel.join(function() {
+    channel.join(function () {
         require('cordova').fireDocumentEvent('deviceready');
     }, channel.deviceReadyChannelsArray);
 
 }, platformInitChannelsArray);
-
 
 });
 
 // file: src/common/modulemapper.js
 define("cordova/modulemapper", function(require, exports, module) {
 
-var builder = require('cordova/builder'),
-    moduleMap = define.moduleMap,
-    symbolList,
-    deprecationMap;
+var builder = require('cordova/builder');
+var moduleMap = define.moduleMap; // eslint-disable-line no-undef
+var symbolList;
+var deprecationMap;
 
-exports.reset = function() {
+exports.reset = function () {
     symbolList = [];
     deprecationMap = {};
 };
 
-function addEntry(strategy, moduleName, symbolPath, opt_deprecationMessage) {
+function addEntry (strategy, moduleName, symbolPath, opt_deprecationMessage) {
     if (!(moduleName in moduleMap)) {
         throw new Error('Module ' + moduleName + ' does not exist.');
     }
@@ -1230,35 +1261,35 @@ function addEntry(strategy, moduleName, symbolPath, opt_deprecationMessage) {
 }
 
 // Note: Android 2.3 does have Function.bind().
-exports.clobbers = function(moduleName, symbolPath, opt_deprecationMessage) {
+exports.clobbers = function (moduleName, symbolPath, opt_deprecationMessage) {
     addEntry('c', moduleName, symbolPath, opt_deprecationMessage);
 };
 
-exports.merges = function(moduleName, symbolPath, opt_deprecationMessage) {
+exports.merges = function (moduleName, symbolPath, opt_deprecationMessage) {
     addEntry('m', moduleName, symbolPath, opt_deprecationMessage);
 };
 
-exports.defaults = function(moduleName, symbolPath, opt_deprecationMessage) {
+exports.defaults = function (moduleName, symbolPath, opt_deprecationMessage) {
     addEntry('d', moduleName, symbolPath, opt_deprecationMessage);
 };
 
-exports.runs = function(moduleName) {
+exports.runs = function (moduleName) {
     addEntry('r', moduleName, null);
 };
 
-function prepareNamespace(symbolPath, context) {
+function prepareNamespace (symbolPath, context) {
     if (!symbolPath) {
         return context;
     }
     var parts = symbolPath.split('.');
     var cur = context;
-    for (var i = 0, part; part = parts[i]; ++i) {
+    for (var i = 0, part; part = parts[i]; ++i) { // eslint-disable-line no-cond-assign
         cur = cur[part] = cur[part] || {};
     }
     return cur;
 }
 
-exports.mapModules = function(context) {
+exports.mapModules = function (context) {
     var origSymbols = {};
     context.CDV_origSymbols = origSymbols;
     for (var i = 0, len = symbolList.length; i < len; i += 3) {
@@ -1266,7 +1297,7 @@ exports.mapModules = function(context) {
         var moduleName = symbolList[i + 1];
         var module = require(moduleName);
         // <runs/>
-        if (strategy == 'r') {
+        if (strategy === 'r') {
             continue;
         }
         var symbolPath = symbolList[i + 2];
@@ -1278,9 +1309,9 @@ exports.mapModules = function(context) {
         var parentObj = prepareNamespace(namespace, context);
         var target = parentObj[lastName];
 
-        if (strategy == 'm' && target) {
+        if (strategy === 'm' && target) {
             builder.recursiveMerge(target, module);
-        } else if ((strategy == 'd' && !target) || (strategy != 'd')) {
+        } else if ((strategy === 'd' && !target) || (strategy !== 'd')) {
             if (!(symbolPath in origSymbols)) {
                 origSymbols[symbolPath] = target;
             }
@@ -1289,7 +1320,7 @@ exports.mapModules = function(context) {
     }
 };
 
-exports.getOriginalSymbol = function(context, symbolPath) {
+exports.getOriginalSymbol = function (context, symbolPath) {
     var origSymbols = context.CDV_origSymbols;
     if (origSymbols && (symbolPath in origSymbols)) {
         return origSymbols[symbolPath];
@@ -1304,19 +1335,531 @@ exports.getOriginalSymbol = function(context, symbolPath) {
 
 exports.reset();
 
-
 });
 
-// file: src/ios/platform.js
+// file: /Users/dpogue/Coding/cordova-ios/cordova-js-src/platform.js
 define("cordova/platform", function(require, exports, module) {
 
 module.exports = {
     id: 'ios',
-    bootstrap: function() {
+    bootstrap: function () {
+        // Attach the console polyfill that is iOS-only to window.console
+        // see the file under plugin/ios/console.js
+        require('cordova/modulemapper').clobbers('cordova/plugin/ios/console', 'window.console');
+
         require('cordova/channel').onNativeReady.fire();
     }
 };
 
+});
+
+// file: /Users/dpogue/Coding/cordova-ios/cordova-js-src/plugin/ios/console.js
+define("cordova/plugin/ios/console", function(require, exports, module) {
+
+//------------------------------------------------------------------------------
+
+var logger = require('cordova/plugin/ios/logger');
+
+//------------------------------------------------------------------------------
+// object that we're exporting
+//------------------------------------------------------------------------------
+var console = module.exports;
+
+//------------------------------------------------------------------------------
+// copy of the original console object
+//------------------------------------------------------------------------------
+var WinConsole = window.console;
+
+//------------------------------------------------------------------------------
+// whether to use the logger
+//------------------------------------------------------------------------------
+var UseLogger = false;
+
+//------------------------------------------------------------------------------
+// Timers
+//------------------------------------------------------------------------------
+var Timers = {};
+
+//------------------------------------------------------------------------------
+// used for unimplemented methods
+//------------------------------------------------------------------------------
+function noop() {}
+
+//------------------------------------------------------------------------------
+// used for unimplemented methods
+//------------------------------------------------------------------------------
+console.useLogger = function (value) {
+    if (arguments.length) UseLogger = !!value;
+
+    if (UseLogger) {
+        if (logger.useConsole()) {
+            throw new Error("console and logger are too intertwingly");
+        }
+    }
+
+    return UseLogger;
+};
+
+//------------------------------------------------------------------------------
+console.log = function() {
+    if (logger.useConsole()) return;
+    logger.log.apply(logger, [].slice.call(arguments));
+};
+
+//------------------------------------------------------------------------------
+console.error = function() {
+    if (logger.useConsole()) return;
+    logger.error.apply(logger, [].slice.call(arguments));
+};
+
+//------------------------------------------------------------------------------
+console.warn = function() {
+    if (logger.useConsole()) return;
+    logger.warn.apply(logger, [].slice.call(arguments));
+};
+
+//------------------------------------------------------------------------------
+console.info = function() {
+    if (logger.useConsole()) return;
+    logger.info.apply(logger, [].slice.call(arguments));
+};
+
+//------------------------------------------------------------------------------
+console.debug = function() {
+    if (logger.useConsole()) return;
+    logger.debug.apply(logger, [].slice.call(arguments));
+};
+
+//------------------------------------------------------------------------------
+console.assert = function(expression) {
+    if (expression) return;
+
+    var message = logger.format.apply(logger.format, [].slice.call(arguments, 1));
+    console.log("ASSERT: " + message);
+};
+
+//------------------------------------------------------------------------------
+console.clear = function() {};
+
+//------------------------------------------------------------------------------
+console.dir = function(object) {
+    console.log("%o", object);
+};
+
+//------------------------------------------------------------------------------
+console.dirxml = function(node) {
+    console.log(node.innerHTML);
+};
+
+//------------------------------------------------------------------------------
+console.trace = noop;
+
+//------------------------------------------------------------------------------
+console.group = console.log;
+
+//------------------------------------------------------------------------------
+console.groupCollapsed = console.log;
+
+//------------------------------------------------------------------------------
+console.groupEnd = noop;
+
+//------------------------------------------------------------------------------
+console.time = function(name) {
+    Timers[name] = new Date().valueOf();
+};
+
+//------------------------------------------------------------------------------
+console.timeEnd = function(name) {
+    var timeStart = Timers[name];
+    if (!timeStart) {
+        console.warn("unknown timer: " + name);
+        return;
+    }
+
+    var timeElapsed = new Date().valueOf() - timeStart;
+    console.log(name + ": " + timeElapsed + "ms");
+};
+
+//------------------------------------------------------------------------------
+console.timeStamp = noop;
+
+//------------------------------------------------------------------------------
+console.profile = noop;
+
+//------------------------------------------------------------------------------
+console.profileEnd = noop;
+
+//------------------------------------------------------------------------------
+console.count = noop;
+
+//------------------------------------------------------------------------------
+console.exception = console.log;
+
+//------------------------------------------------------------------------------
+console.table = function(data, columns) {
+    console.log("%o", data);
+};
+
+//------------------------------------------------------------------------------
+// return a new function that calls both functions passed as args
+//------------------------------------------------------------------------------
+function wrappedOrigCall(orgFunc, newFunc) {
+    return function() {
+        var args = [].slice.call(arguments);
+        try { orgFunc.apply(WinConsole, args); } catch (e) {}
+        try { newFunc.apply(console,    args); } catch (e) {}
+    };
+}
+
+//------------------------------------------------------------------------------
+// For every function that exists in the original console object, that
+// also exists in the new console object, wrap the new console method
+// with one that calls both
+//------------------------------------------------------------------------------
+for (var key in console) {
+    if (typeof WinConsole[key] == "function") {
+        console[key] = wrappedOrigCall(WinConsole[key], console[key]);
+    }
+}
+
+});
+
+// file: /Users/dpogue/Coding/cordova-ios/cordova-js-src/plugin/ios/logger.js
+define("cordova/plugin/ios/logger", function(require, exports, module) {
+
+//------------------------------------------------------------------------------
+// The logger module exports the following properties/functions:
+//
+// LOG                          - constant for the level LOG
+// ERROR                        - constant for the level ERROR
+// WARN                         - constant for the level WARN
+// INFO                         - constant for the level INFO
+// DEBUG                        - constant for the level DEBUG
+// logLevel()                   - returns current log level
+// logLevel(value)              - sets and returns a new log level
+// useConsole()                 - returns whether logger is using console
+// useConsole(value)            - sets and returns whether logger is using console
+// log(message,...)             - logs a message at level LOG
+// error(message,...)           - logs a message at level ERROR
+// warn(message,...)            - logs a message at level WARN
+// info(message,...)            - logs a message at level INFO
+// debug(message,...)           - logs a message at level DEBUG
+// logLevel(level,message,...)  - logs a message specified level
+//
+//------------------------------------------------------------------------------
+
+var logger = exports;
+
+var exec    = require('cordova/exec');
+
+var UseConsole   = false;
+var UseLogger    = true;
+var Queued       = [];
+var DeviceReady  = false;
+var CurrentLevel;
+
+var originalConsole = console;
+
+/**
+ * Logging levels
+ */
+
+var Levels = [
+    "LOG",
+    "ERROR",
+    "WARN",
+    "INFO",
+    "DEBUG"
+];
+
+/*
+ * add the logging levels to the logger object and
+ * to a separate levelsMap object for testing
+ */
+
+var LevelsMap = {};
+for (var i=0; i<Levels.length; i++) {
+    var level = Levels[i];
+    LevelsMap[level] = i;
+    logger[level]    = level;
+}
+
+CurrentLevel = LevelsMap.WARN;
+
+/**
+ * Getter/Setter for the logging level
+ *
+ * Returns the current logging level.
+ *
+ * When a value is passed, sets the logging level to that value.
+ * The values should be one of the following constants:
+ *    logger.LOG
+ *    logger.ERROR
+ *    logger.WARN
+ *    logger.INFO
+ *    logger.DEBUG
+ *
+ * The value used determines which messages get printed.  The logging
+ * values above are in order, and only messages logged at the logging
+ * level or above will actually be displayed to the user.  E.g., the
+ * default level is WARN, so only messages logged with LOG, ERROR, or
+ * WARN will be displayed; INFO and DEBUG messages will be ignored.
+ */
+logger.level = function (value) {
+    if (arguments.length) {
+        if (LevelsMap[value] === null) {
+            throw new Error("invalid logging level: " + value);
+        }
+        CurrentLevel = LevelsMap[value];
+    }
+
+    return Levels[CurrentLevel];
+};
+
+/**
+ * Getter/Setter for the useConsole functionality
+ *
+ * When useConsole is true, the logger will log via the
+ * browser 'console' object.
+ */
+logger.useConsole = function (value) {
+    if (arguments.length) UseConsole = !!value;
+
+    if (UseConsole) {
+        if (typeof console == "undefined") {
+            throw new Error("global console object is not defined");
+        }
+
+        if (typeof console.log != "function") {
+            throw new Error("global console object does not have a log function");
+        }
+
+        if (typeof console.useLogger == "function") {
+            if (console.useLogger()) {
+                throw new Error("console and logger are too intertwingly");
+            }
+        }
+    }
+
+    return UseConsole;
+};
+
+/**
+ * Getter/Setter for the useLogger functionality
+ *
+ * When useLogger is true, the logger will log via the
+ * native Logger plugin.
+ */
+logger.useLogger = function (value) {
+    // Enforce boolean
+    if (arguments.length) UseLogger = !!value;
+    return UseLogger;
+};
+
+/**
+ * Logs a message at the LOG level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.log   = function(message) { logWithArgs("LOG",   arguments); };
+
+/**
+ * Logs a message at the ERROR level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.error = function(message) { logWithArgs("ERROR", arguments); };
+
+/**
+ * Logs a message at the WARN level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.warn  = function(message) { logWithArgs("WARN",  arguments); };
+
+/**
+ * Logs a message at the INFO level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.info  = function(message) { logWithArgs("INFO",  arguments); };
+
+/**
+ * Logs a message at the DEBUG level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.debug = function(message) { logWithArgs("DEBUG", arguments); };
+
+// log at the specified level with args
+function logWithArgs(level, args) {
+    args = [level].concat([].slice.call(args));
+    logger.logLevel.apply(logger, args);
+}
+
+// return the correct formatString for an object
+function formatStringForMessage(message) {
+    return (typeof message === "string") ? "" : "%o"; 
+}
+
+/**
+ * Logs a message at the specified level.
+ *
+ * Parameters passed after message are used applied to
+ * the message with utils.format()
+ */
+logger.logLevel = function(level /* , ... */) {
+    // format the message with the parameters
+    var formatArgs = [].slice.call(arguments, 1);
+    var fmtString = formatStringForMessage(formatArgs[0]);
+    if (fmtString.length > 0){
+        formatArgs.unshift(fmtString); // add formatString
+    }
+
+    var message    = logger.format.apply(logger.format, formatArgs);
+
+    if (LevelsMap[level] === null) {
+        throw new Error("invalid logging level: " + level);
+    }
+
+    if (LevelsMap[level] > CurrentLevel) return;
+
+    // queue the message if not yet at deviceready
+    if (!DeviceReady && !UseConsole) {
+        Queued.push([level, message]);
+        return;
+    }
+
+    // Log using the native logger if that is enabled
+    if (UseLogger) {
+        exec(null, null, "Console", "logLevel", [level, message]);
+    }
+
+    // Log using the console if that is enabled
+    if (UseConsole) {
+        // make sure console is not using logger
+        if (console.useLogger()) {
+            throw new Error("console and logger are too intertwingly");
+        }
+
+        // log to the console
+        switch (level) {
+            case logger.LOG:   originalConsole.log(message); break;
+            case logger.ERROR: originalConsole.log("ERROR: " + message); break;
+            case logger.WARN:  originalConsole.log("WARN: "  + message); break;
+            case logger.INFO:  originalConsole.log("INFO: "  + message); break;
+            case logger.DEBUG: originalConsole.log("DEBUG: " + message); break;
+        }
+    }
+};
+
+
+/**
+ * Formats a string and arguments following it ala console.log()
+ *
+ * Any remaining arguments will be appended to the formatted string.
+ *
+ * for rationale, see FireBug's Console API:
+ *    http://getfirebug.com/wiki/index.php/Console_API
+ */
+logger.format = function(formatString, args) {
+    return __format(arguments[0], [].slice.call(arguments,1)).join(' ');
+};
+
+
+//------------------------------------------------------------------------------
+/**
+ * Formats a string and arguments following it ala vsprintf()
+ *
+ * format chars:
+ *   %j - format arg as JSON
+ *   %o - format arg as JSON
+ *   %c - format arg as ''
+ *   %% - replace with '%'
+ * any other char following % will format it's
+ * arg via toString().
+ *
+ * Returns an array containing the formatted string and any remaining
+ * arguments.
+ */
+function __format(formatString, args) {
+    if (formatString === null || formatString === undefined) return [""];
+    if (arguments.length == 1) return [formatString.toString()];
+
+    if (typeof formatString != "string")
+        formatString = formatString.toString();
+
+    var pattern = /(.*?)%(.)(.*)/;
+    var rest    = formatString;
+    var result  = [];
+
+    while (args.length) {
+        var match = pattern.exec(rest);
+        if (!match) break;
+
+        var arg   = args.shift();
+        rest = match[3];
+        result.push(match[1]);
+
+        if (match[2] == '%') {
+            result.push('%');
+            args.unshift(arg);
+            continue;
+        }
+
+        result.push(__formatted(arg, match[2]));
+    }
+
+    result.push(rest);
+
+    var remainingArgs = [].slice.call(args);
+    remainingArgs.unshift(result.join(''));
+    return remainingArgs;
+}
+
+function __formatted(object, formatChar) {
+
+    try {
+        switch(formatChar) {
+            case 'j':
+            case 'o': return JSON.stringify(object);
+            case 'c': return '';
+        }
+    }
+    catch (e) {
+        return "error JSON.stringify()ing argument: " + e;
+    }
+
+    if ((object === null) || (object === undefined)) {
+        return Object.prototype.toString.call(object);
+    }
+
+    return object.toString();
+}
+
+
+//------------------------------------------------------------------------------
+// when deviceready fires, log queued messages
+logger.__onDeviceReady = function() {
+    if (DeviceReady) return;
+
+    DeviceReady = true;
+
+    for (var i=0; i<Queued.length; i++) {
+        var messageArgs = Queued[i];
+        logger.logLevel(messageArgs[0], messageArgs[1]);
+    }
+
+    Queued = null;
+};
+
+// add a deviceready event to log queued messages
+document.addEventListener("deviceready", logger.__onDeviceReady, false);
 
 });
 
@@ -1324,45 +1867,52 @@ module.exports = {
 define("cordova/pluginloader", function(require, exports, module) {
 
 var modulemapper = require('cordova/modulemapper');
-var urlutil = require('cordova/urlutil');
 
 // Helper function to inject a <script> tag.
-function injectScript(url, onload, onerror) {
-    var script = document.createElement("script");
+// Exported for testing.
+exports.injectScript = function (url, onload, onerror) {
+    var script = document.createElement('script');
     // onload fires even when script fails loads with an error.
     script.onload = onload;
-    script.onerror = onerror || onload;
+    // onerror fires for malformed URLs.
+    script.onerror = onerror;
     script.src = url;
     document.head.appendChild(script);
+};
+
+function injectIfNecessary (id, url, onload, onerror) {
+    onerror = onerror || onload;
+    if (id in define.moduleMap) { // eslint-disable-line no-undef
+        onload();
+    } else {
+        exports.injectScript(url, function () {
+            if (id in define.moduleMap) { // eslint-disable-line no-undef
+                onload();
+            } else {
+                onerror();
+            }
+        }, onerror);
+    }
 }
 
-function onScriptLoadingComplete(moduleList, finishPluginLoading) {
+function onScriptLoadingComplete (moduleList, finishPluginLoading) {
     // Loop through all the plugins and then through their clobbers and merges.
-    for (var i = 0, module; module = moduleList[i]; i++) {
-        if (module) {
-            try {
-                if (module.clobbers && module.clobbers.length) {
-                    for (var j = 0; j < module.clobbers.length; j++) {
-                        modulemapper.clobbers(module.id, module.clobbers[j]);
-                    }
-                }
-
-                if (module.merges && module.merges.length) {
-                    for (var k = 0; k < module.merges.length; k++) {
-                        modulemapper.merges(module.id, module.merges[k]);
-                    }
-                }
-
-                // Finally, if runs is truthy we want to simply require() the module.
-                // This can be skipped if it had any merges or clobbers, though,
-                // since the mapper will already have required the module.
-                if (module.runs && !(module.clobbers && module.clobbers.length) && !(module.merges && module.merges.length)) {
-                    modulemapper.runs(module.id);
-                }
+    for (var i = 0, module; module = moduleList[i]; i++) { // eslint-disable-line no-cond-assign
+        if (module.clobbers && module.clobbers.length) {
+            for (var j = 0; j < module.clobbers.length; j++) {
+                modulemapper.clobbers(module.id, module.clobbers[j]);
             }
-            catch(err) {
-                // error with module, most likely clobbers, should we continue?
+        }
+
+        if (module.merges && module.merges.length) {
+            for (var k = 0; k < module.merges.length; k++) {
+                modulemapper.merges(module.id, module.merges[k]);
             }
+        }
+
+        // Finally, if runs is truthy we want to simply require() the module.
+        if (module.runs) {
+            modulemapper.runs(module.id);
         }
     }
 
@@ -1373,7 +1923,7 @@ function onScriptLoadingComplete(moduleList, finishPluginLoading) {
 // See plugman's plugin_loader.js for the details of this object.
 // This function is only called if the really is a plugins array that isn't empty.
 // Otherwise the onerror response handler will just call finishPluginLoading().
-function handlePluginsObject(path, moduleList, finishPluginLoading) {
+function handlePluginsObject (path, moduleList, finishPluginLoading) {
     // Now inject the scripts.
     var scriptCounter = moduleList.length;
 
@@ -1381,41 +1931,25 @@ function handlePluginsObject(path, moduleList, finishPluginLoading) {
         finishPluginLoading();
         return;
     }
-    function scriptLoadedCallback() {
+    function scriptLoadedCallback () {
         if (!--scriptCounter) {
             onScriptLoadingComplete(moduleList, finishPluginLoading);
         }
     }
 
     for (var i = 0; i < moduleList.length; i++) {
-        injectScript(path + moduleList[i].file, scriptLoadedCallback);
+        injectIfNecessary(moduleList[i].id, path + moduleList[i].file, scriptLoadedCallback);
     }
 }
 
-function injectPluginScript(pathPrefix, finishPluginLoading) {
-    var pluginPath = pathPrefix + 'cordova_plugins.js';
-
-    injectScript(pluginPath, function() {
-        try {
-            var moduleList = require("cordova/plugin_list");
-            handlePluginsObject(pathPrefix, moduleList, finishPluginLoading);
-        }
-        catch (e) {
-            // Error loading cordova_plugins.js, file not found or something
-            // this is an acceptable error, pre-3.0.0, so we just move on.
-            finishPluginLoading();
-        }
-    }, finishPluginLoading); // also, add script load error handler for file not found
-}
-
-function findCordovaPath() {
+function findCordovaPath () {
     var path = null;
     var scripts = document.getElementsByTagName('script');
-    var term = 'cordova.js';
-    for (var n = scripts.length-1; n>-1; n--) {
-        var src = scripts[n].src;
-        if (src.indexOf(term) == (src.length - term.length)) {
-            path = src.substring(0, src.length - term.length);
+    var term = '/cordova.js';
+    for (var n = scripts.length - 1; n > -1; n--) {
+        var src = scripts[n].src.replace(/\?.*$/, ''); // Strip any query param (CB-6007).
+        if (src.indexOf(term) === (src.length - term.length)) {
+            path = src.substring(0, src.length - term.length) + '/';
             break;
         }
     }
@@ -1425,32 +1959,32 @@ function findCordovaPath() {
 // Tries to load all plugins' js-modules.
 // This is an async process, but onDeviceReady is blocked on onPluginsReady.
 // onPluginsReady is fired when there are no plugins to load, or they are all done.
-exports.load = function(callback) {
+exports.load = function (callback) {
     var pathPrefix = findCordovaPath();
     if (pathPrefix === null) {
         console.log('Could not find cordova.js script tag. Plugin loading may fail.');
         pathPrefix = '';
     }
-    injectPluginScript(pathPrefix, callback);
+    injectIfNecessary('cordova/plugin_list', pathPrefix + 'cordova_plugins.js', function () {
+        var moduleList = require('cordova/plugin_list');
+        handlePluginsObject(pathPrefix, moduleList, callback);
+    }, callback);
 };
-
 
 });
 
 // file: src/common/urlutil.js
 define("cordova/urlutil", function(require, exports, module) {
 
-
 /**
  * For already absolute URLs, returns what is passed in.
  * For relative URLs, converts them to absolute ones.
  */
-exports.makeAbsolute = function makeAbsolute(url) {
+exports.makeAbsolute = function makeAbsolute (url) {
     var anchorEl = document.createElement('a');
     anchorEl.href = url;
     return anchorEl.href;
 };
-
 
 });
 
@@ -1462,7 +1996,7 @@ var utils = exports;
 /**
  * Defines a property getter / setter for obj[key].
  */
-utils.defineGetterSetter = function(obj, key, getFunc, opt_setFunc) {
+utils.defineGetterSetter = function (obj, key, getFunc, opt_setFunc) {
     if (Object.defineProperty) {
         var desc = {
             get: getFunc,
@@ -1485,13 +2019,13 @@ utils.defineGetterSetter = function(obj, key, getFunc, opt_setFunc) {
  */
 utils.defineGetter = utils.defineGetterSetter;
 
-utils.arrayIndexOf = function(a, item) {
+utils.arrayIndexOf = function (a, item) {
     if (a.indexOf) {
         return a.indexOf(item);
     }
     var len = a.length;
     for (var i = 0; i < len; ++i) {
-        if (a[i] == item) {
+        if (a[i] === item) {
             return i;
         }
     }
@@ -1501,53 +2035,55 @@ utils.arrayIndexOf = function(a, item) {
 /**
  * Returns whether the item was found in the array.
  */
-utils.arrayRemove = function(a, item) {
+utils.arrayRemove = function (a, item) {
     var index = utils.arrayIndexOf(a, item);
-    if (index != -1) {
+    if (index !== -1) {
         a.splice(index, 1);
     }
-    return index != -1;
+    return index !== -1;
 };
 
-utils.typeName = function(val) {
+utils.typeName = function (val) {
     return Object.prototype.toString.call(val).slice(8, -1);
 };
 
 /**
  * Returns an indication of whether the argument is an array or not
  */
-utils.isArray = function(a) {
-    return utils.typeName(a) == 'Array';
-};
+utils.isArray = Array.isArray ||
+                function (a) { return utils.typeName(a) === 'Array'; };
 
 /**
  * Returns an indication of whether the argument is a Date or not
  */
-utils.isDate = function(d) {
-    return utils.typeName(d) == 'Date';
+utils.isDate = function (d) {
+    return (d instanceof Date);
 };
 
 /**
  * Does a deep clone of the object.
  */
-utils.clone = function(obj) {
-    if(!obj || typeof obj == 'function' || utils.isDate(obj) || typeof obj != 'object') {
+utils.clone = function (obj) {
+    if (!obj || typeof obj === 'function' || utils.isDate(obj) || typeof obj !== 'object') {
         return obj;
     }
 
     var retVal, i;
 
-    if(utils.isArray(obj)){
+    if (utils.isArray(obj)) {
         retVal = [];
-        for(i = 0; i < obj.length; ++i){
+        for (i = 0; i < obj.length; ++i) {
             retVal.push(utils.clone(obj[i]));
         }
         return retVal;
     }
 
     retVal = {};
-    for(i in obj){
-        if(!(i in retVal) || retVal[i] != obj[i]) {
+    for (i in obj) {
+        // https://issues.apache.org/jira/browse/CB-11522 'unknown' type may be returned in
+        // custom protocol activation case on Windows Phone 8.1 causing "No such interface supported" exception
+        // on cloning.
+        if ((!(i in retVal) || retVal[i] !== obj[i]) && typeof obj[i] !== 'undefined' && typeof obj[i] !== 'unknown') { // eslint-disable-line valid-typeof
             retVal[i] = utils.clone(obj[i]);
         }
     }
@@ -1557,22 +2093,30 @@ utils.clone = function(obj) {
 /**
  * Returns a wrapped version of the function
  */
-utils.close = function(context, func, params) {
-    if (typeof params == 'undefined') {
-        return function() {
-            return func.apply(context, arguments);
-        };
-    } else {
-        return function() {
-            return func.apply(context, params);
-        };
-    }
+utils.close = function (context, func, params) {
+    return function () {
+        var args = params || arguments;
+        return func.apply(context, args);
+    };
 };
+
+// ------------------------------------------------------------------------------
+function UUIDcreatePart (length) {
+    var uuidpart = '';
+    for (var i = 0; i < length; i++) {
+        var uuidchar = parseInt((Math.random() * 256), 10).toString(16);
+        if (uuidchar.length === 1) {
+            uuidchar = '0' + uuidchar;
+        }
+        uuidpart += uuidchar;
+    }
+    return uuidpart;
+}
 
 /**
  * Create a UUID
  */
-utils.createUUID = function() {
+utils.createUUID = function () {
     return UUIDcreatePart(4) + '-' +
         UUIDcreatePart(2) + '-' +
         UUIDcreatePart(2) + '-' +
@@ -1584,11 +2128,12 @@ utils.createUUID = function() {
  * Extends a child object from a parent object using classical inheritance
  * pattern.
  */
-utils.extend = (function() {
+utils.extend = (function () {
     // proxy used to establish prototype chain
-    var F = function() {};
+    var F = function () {};
     // extend Child from Parent
-    return function(Child, Parent) {
+    return function (Child, Parent) {
+
         F.prototype = Parent.prototype;
         Child.prototype = new F();
         Child.__super__ = Parent.prototype;
@@ -1599,28 +2144,13 @@ utils.extend = (function() {
 /**
  * Alerts a message in any available way: alert or console.log.
  */
-utils.alert = function(msg) {
+utils.alert = function (msg) {
     if (window.alert) {
         window.alert(msg);
     } else if (console && console.log) {
         console.log(msg);
     }
 };
-
-
-//------------------------------------------------------------------------------
-function UUIDcreatePart(length) {
-    var uuidpart = "";
-    for (var i=0; i<length; i++) {
-        var uuidchar = parseInt((Math.random() * 256), 10).toString(16);
-        if (uuidchar.length == 1) {
-            uuidchar = "0" + uuidchar;
-        }
-        uuidpart += uuidchar;
-    }
-    return uuidpart;
-}
-
 
 });
 
