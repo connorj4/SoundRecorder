@@ -22,7 +22,7 @@
   "_resolved": "https://registry.npmjs.org/cordova-plugin-file/-/cordova-plugin-file-6.0.2.tgz",
   "_shasum": "f3911479f8357e9aacb5576674f8d95b31a1fb20",
   "_spec": "cordova-plugin-file@^6.0.0",
-  "_where": "/Users/joshua/Documents/SCSU/Masters/2019 Fall Semester/CSC 550-01 Mobile Apps/Mobile Assignments/team1/SoundRecorder",
+  "_where": "/Users/jimgregory/Documents/_School/xcode/SoundRecorder",
   "author": {
     "name": "Apache Software Foundation"
   },

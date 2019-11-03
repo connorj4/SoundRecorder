@@ -4,7 +4,6 @@ a {
 
 .center-wrapper {
 	text-align: center;
-    background-color: blue;
 }
 .center-wrapper * {
 	margin: 0 auto;
