@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map View</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 280px;
+        width: 250px;
+        margin: 0 auto;
+      }
+    </style>
+
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <link rel="stylesheet" href="jqueryMobile/jquery.mobile-1.4.0.min.css">
+    <script src="jqueryMobile/jquery-1.10.2.min.js"></script>
+    <script src="jqueryMobile/jquery.mobile-1.4.0.min.js"></script>
+    
+  </head>
+  <body>
+  
+  
+    <div data-role="page" id="geolocation">
+        <div data-role="header">
+            <h1>GoogleMap Integration</h1>
+            <a href="index.html" data-role="button" data-rel="back" data-icon="back">Back</a>
+        </div>
+
+        <div data-role="content">
+            <h1>Mapview</h1>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+
+    <script type="text/javascript">
+        function initMap() {
+
+           var googleMap;
+           var locationCoordinates = {lat: 41.283319, lng: -72.628108};
+
+           googleMap = new google.maps.Map(document.getElementById('map'), {
+              center : locationCoordinates,
+              zoom: 12 });
+
+           var marker = new google.maps.Marker({position: locationCoordinates, map: googleMap});
+        }
+    </script>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAEqNx72XG53Yl-Wm_-pscdiYw-AmxfVp0&callback=initMap"
+    async defer></script>
+
+  </body>
+</html>
