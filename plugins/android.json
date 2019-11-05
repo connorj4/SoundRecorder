@@ -13,6 +13,9 @@
     "cordova-plugin-media": {
       "PACKAGE_NAME": "com.jsmobile.soundrecorder"
     },
+    "cordova-plugin-media-capture": {
+      "PACKAGE_NAME": "com.jsmobile.soundrecorder"
+    },
     "cordova-plugin-camera": {
       "ANDROID_SUPPORT_V4_VERSION": "27.+",
       "PACKAGE_NAME": "com.jsmobile.soundrecorder"

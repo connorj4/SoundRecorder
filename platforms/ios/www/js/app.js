@@ -5,7 +5,8 @@
     var recordingMedia;
     var recInterval;
 
-    $(document).on("pageinit", "#main", function(e) {
+    //$(document).on("pageinit", "#main", function(e) {
+    $(document).on("#soundR", function(e) {
         e.preventDefault();
 
         function onDeviceReady() {
@@ -53,22 +54,9 @@
                 playSound($("#location").val(), playCallback);
             });
 
-            // Added for Camera plugin addition
-            console.log(navigator.camera);
-            // take the photo
-            $("#takePhoto").on("tap", function(e) {
-                navigator.camera.getPicture(cameraSuccess, cameraError, cameraOptions);
-            });
-            // show the photo
 
-            $("#showPhoto").on("tap", function(e) {
-                function cameraCallback(imageData) {
-                    var image = document.getElementById('myImage');
-                    image.src = "data:image/jpeg;base64," + imageData;
-                }
-            });
+
         }
-
         $(document).on('deviceready', onDeviceReady);
 
         initPage();
@@ -176,14 +164,7 @@
         $("#playSound").closest('.ui-btn').hide();
     }
 
-    /*
-    Added to support plugin for camera
-    details: https://www.npmjs.com/package/fitatu-cordova-plugin-camera
-    Note ios 
-    CAMERA_USAGE_DESCRIPTION for NSCameraUsageDescription
-    PHOTOLIBRARY_USAGE_DESCRIPTION for NSPhotoLibraryUsageDescription
-    are needed.
-    */
+
 
 
 
